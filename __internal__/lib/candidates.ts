@@ -103,16 +103,36 @@ export async function updateCandidateStatus(
  * Mark a candidate as having downloaded the challenge
  */
 export async function markCandidateDownloaded(candidateId: string): Promise<void> {
-  const { error } = await supabaseAdmin
-    .from('candidates')
-    .update({
-      status: 'downloaded',
-      downloaded_at: new Date().toISOString(),
-      download_count: supabaseAdmin.rpc('increment', { row_id: candidateId, table: 'candidates', column: 'download_count' }),
-    })
-    .eq('id', candidateId);
-  
-  if (error) {
+  try {
+    // First, get the current candidate data
+    const { data: candidate, error: fetchError } = await supabaseAdmin
+      .from('candidates')
+      .select('download_count')
+      .eq('id', candidateId)
+      .single();
+    
+    if (fetchError) {
+      throw new Error(`Failed to fetch candidate data: ${fetchError.message}`);
+    }
+    
+    // Calculate new download count
+    const currentCount = candidate?.download_count || 0;
+    const newCount = currentCount + 1;
+    
+    // Then update status, timestamp and increment download count
+    const { error: updateError } = await supabaseAdmin
+      .from('candidates')
+      .update({
+        status: 'downloaded',
+        downloaded_at: new Date().toISOString(),
+        download_count: newCount
+      })
+      .eq('id', candidateId);
+    
+    if (updateError) {
+      throw new Error(`Failed to update candidate: ${updateError.message}`);
+    }
+  } catch (error: any) {
     console.error('Error marking candidate as downloaded:', error);
     throw new Error(`Failed to mark candidate as downloaded: ${error.message}`);
   }

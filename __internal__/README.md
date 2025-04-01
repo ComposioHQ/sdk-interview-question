@@ -184,7 +184,6 @@ The schema migration script (`schema.sql`) creates:
 1. A `candidates` table for tracking candidate invitations and downloads
 2. A `releases` table for storing GitHub releases
 3. Necessary indexes for better performance
-4. A utility function for incrementing download counts
 
 You can run it directly from the CLI with the Supabase CLI:
 

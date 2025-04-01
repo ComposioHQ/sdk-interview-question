@@ -27,19 +27,3 @@ CREATE INDEX IF NOT EXISTS idx_candidates_token ON candidates(token);
 
 -- Create index for releases by creation date
 CREATE INDEX IF NOT EXISTS idx_releases_created_at ON releases(created_at DESC);
-
--- Function to increment a column in any table
-CREATE OR REPLACE FUNCTION increment(row_id UUID, tab text, col text)
-RETURNS integer
-LANGUAGE plpgsql
-AS $$
-DECLARE
-  result integer;
-BEGIN
-  EXECUTE format('UPDATE %I SET %I = %I + 1 WHERE id = $1 RETURNING %I', tab, col, col, col)
-  INTO result
-  USING row_id;
-  
-  RETURN result;
-END;
-$$;
