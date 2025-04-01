@@ -2,11 +2,13 @@
   "name": "sdk-design-question",
   "module": "src/index.ts",
   "type": "module",
+  "workspaces": ["__internal__/*"],
   "devDependencies": {
     "@types/bun": "latest",
     "@types/react": "^19.0.10",
     "@types/use-sync-external-store": "^0.0.6",
     "react": "^19.0.0",
+    "supabase": "^2.20.5",
     "use-sync-external-store": "^1.4.0"
   },
   "peerDependencies": {
