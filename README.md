@@ -29,6 +29,17 @@ the seeded code is in `src/` from `zustand` feel free to throw it out if you'd p
 
 it should be usable like this
 ```tsx
+const useWebsocketStore = () => {
+  // YOUR SDK used here
+
+  // define state.kind (types of the state of the state machine explicitly)
+  // define state transitions explicitly (which states can go to which other states)
+  // define actions how the state has a transition to another state explicitly
+  // these are the contracts of the state machine
+
+  return { state, actions };
+};
+
 const App = () => {
   const { state, actions } = useWebsocketStore();
 
@@ -51,10 +62,14 @@ const App = () => {
 };
 ```
 
+use `test/sdk.tsx` to design the api
+
+to submit, reply to the email you got with the zipped folder after an hr (max 75 mins) after you start
+
 
 ### references
 
-1. [zustand](https://github.com/pmndrs/zustand) 
+1. [zustand](https://github.com/pmndrs/zustand), also have an `example_zustand.tsx` file inside docs you can look at
    ```ts
    // Basic Zustand example
    import { create } from 'zustand'
