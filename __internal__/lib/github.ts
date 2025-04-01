@@ -13,7 +13,7 @@ export async function getLatestRelease() {
   try {
     const response = await fetch(url, {
       headers: {
-        'Authorization': `token ${process.env.GH_PAT}`,
+        'Authorization': `token ${process.env.GH_PAT || process.env.GITHUB_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
       },
     });
@@ -55,7 +55,7 @@ export async function createRelease(version: string, name: string, zipFilePath: 
     const createResponse = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `token ${process.env.GH_PAT}`,
+        'Authorization': `token ${process.env.GH_PAT || process.env.GITHUB_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
       },

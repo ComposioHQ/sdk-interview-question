@@ -85,6 +85,8 @@ GITHUB_WEBHOOK_SECRET=your-webhook-secret
 1. Generate a GitHub Personal Access Token with `repo` scope 
 2. Add the token to your `.env.local` file as `GH_PAT`
 
+This token is only needed for local development and testing. In production with GitHub Actions, the workflow will use the default GITHUB_TOKEN provided by GitHub.
+
 ### Step 5: Start the Development Server
 
 ```bash
@@ -190,13 +192,15 @@ You can run it directly from the CLI with the Supabase CLI:
 cat schema.sql | supabase sql --db-url postgresql://postgres:postgres@localhost:54322/postgres
 ```
 
-### Additional GitHub Configuration
+### About GitHub Actions and Releases
 
-For production deployments, you should also:
+This system uses GitHub Actions to automatically create releases of your repository when you push to the main branch. The workflow is defined in the top-level `.github/workflows/release.yml` file and will:
 
-1. Set up a webhook in your repository settings that points to your deployed `/api/github-webhook` endpoint
-2. Configure the webhook secret in your environment variables
-3. Set the webhook to trigger on release events
+1. Create a clean ZIP of the repository (excluding internal files)
+2. Create a new GitHub release with this ZIP file
+3. The ZIP file will be available for candidates to download
+
+Note: The GitHub workflow uses the default `GITHUB_TOKEN` that is automatically provided by GitHub Actions, so you don't need to configure a personal access token for this part of the functionality.
 
 ## Usage
 
