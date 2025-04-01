@@ -115,6 +115,10 @@ Available commands:
       case "invite": {
         const email = process.argv[3];
 
+        console.log(
+          `NEXT_PUBLIC_BASE_URL: ${process.env.NEXT_PUBLIC_BASE_URL}`
+        );
+
         if (!email || !email.includes("@")) {
           console.error("Please provide a valid email address.");
           break;
