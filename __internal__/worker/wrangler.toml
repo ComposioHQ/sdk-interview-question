@@ -1,0 +1,8 @@
+name = "sdk-design-question-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+account_id = "4d4f16c61d89ec64e760039c4ec50717"
+
+[[kv_namespaces]]
+binding = "DEPLOYMENTS"
+id = "78652f4534ad45729a98a20fd4730aac"

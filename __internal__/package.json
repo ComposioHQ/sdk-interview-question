@@ -2,13 +2,15 @@
   "name": "sdk-challenge-admin",
   "version": "0.1.0",
   "private": true,
+  "workspaces": ["worker"],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "invite": "bun cli.ts invite",
-    "list": "bun cli.ts list"
+    "list": "bun cli.ts list",
+    "deploy:worker": "cd worker && bun install && bun run deploy"
   },
   "bin": {
     "sdk-challenge": "./cli.ts"

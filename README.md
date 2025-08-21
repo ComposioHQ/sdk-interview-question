@@ -19,7 +19,7 @@ i want you to design a "better" state machine library, ideally i want it to use 
 
 
 this is a sample state machine
-![](docs/stateMachine.png)
+![example state machine](https://utfs.io/f/f7900d2a-1e91-4106-8f40-0b0317df08bc-w03t4m.png)
 
 it should be type safe, it should have state, transitions and action definitions. this means i want these **"CONTRACTS" explicitly defined** in the type system
 
