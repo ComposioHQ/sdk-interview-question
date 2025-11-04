@@ -1,46 +1,28 @@
-# sdk-design-question
+# Composio SDK Design Challenge
 
-To install dependencies:
-
-```bash
-curl -fsSL https://bun.sh/install | bash
-bun install
-```
-
-To run:
-
-```bash
-bun run src/index.ts
-```
 
 ## Task
 
-Design a "better" state machine library that uses **discriminated unions** and has a clean, simple zustand-like API.
+Build a SDK that allows someone to build type-safe sdks with a simple zustand like interface.
 
-### Requirements
+The SDK should make it easy to define the states, their types and the transitions between states in a type-safe manner.
 
-- **Type safe**: All states, transitions and actions must have contracts explicitly defined in the type system
-- **Discriminated unions**: Use TypeScript discriminated unions for state representation
-- **Clean API**: Similar simplicity to zustand but built for state machines
+To submit this, you have 90 mins and i want two things in order of priority
+1. design doc -> this should be another md file in the repo that you make
+2. the basic implementation, don't have to fully work but as far as you can get is ideal
 
-### Example State Machine
+
+### What are state machines
+
+State machines are contracts where you move from one state to another by pre specified transitions. in the below example if you are in the DRAFT state, you can only move to DRAFT (by update document) or REVIEW (by begin review)
+
 ![example state machine](https://utfs.io/f/f7900d2a-1e91-4106-8f40-0b0317df08bc-w03t4m.png)
 
-<details>
-<summary><b>📚 Need clarification on state machines or discriminated unions? (Click to expand)</b></summary>
-
-### What is a State Machine?
-
-A **state machine** is a computational model that can be in exactly one of a finite number of states at any given time. The machine transitions from one state to another in response to external inputs (actions/events). The key concepts are:
-
-1. **States**: Distinct modes of operation (e.g., idle, connecting, connected, error)
-2. **Transitions**: Rules defining how to move between states  
-3. **Actions**: Events that trigger transitions
-4. **Guards**: Conditions that must be met for a transition to occur
+**For this task, both the states and the transitions should be type-safe and predefined by the developer using this sdk**
 
 ### What are Discriminated Unions?
 
-**Discriminated unions** (tagged unions) are a TypeScript pattern for creating types that can be one of several different shapes, with a common property (the "discriminant") that TypeScript uses to narrow the type:
+Discriminated unions are a pattern for creating types that can be one of several different shapes, with a common property (the "discriminant") that lsp uses to narrow the type:
 
 ```typescript
 // The 'kind' property is the discriminant
@@ -49,111 +31,32 @@ type WebSocketState =
   | { kind: 'connecting'; attempt: number }
   | { kind: 'connected'; socket: WebSocket; connectedAt: Date }
   | { kind: 'error'; message: string; canRetry: boolean }
+
+
+const state: WebSocketState = {kind: "idle"}
+
+switch (state.kind) {
+  case "connecting": {
+    console.log("connecting with attempt", state.attempt)
+    break
+  }
+  case "connected": {
+    console.log("connected at", state.connectedAt)
+    return state.socket
+  }
+  case "error": {
+    console.log("failed to connect", state.message)
+    break
+  }
+  case "idle": {
+    console.log("is idle")
+    break
+  }
+}
 ```
 
-### Architecture Patterns
+You can play with the types [here](https://www.typescriptlang.org/play/?#code/PTAEBUAsFNQcgNYEsB2ATOoAOAnA9ltDgC4CeoSAzqMTKGlQMY5IC2qAhisQFBmGgA6tABGAZTyME0YmOIdisALygeoUAB9QAb1DJ0ALnhI0AG2iYAvms069qNEbiM8KFNEbFUAczgBuUAVFVixiIxQAV1YRIlBrdS1dfUd4FzcPRQwAyklpMKFRCSkZALT3T2g0AEF8gBEFWHjbJIcnInwcf1BWaEpKDm9oI0piFhRvUq4AJRkcUiMRPDxzLjiedbSR0BGG0BVtZKMAIhNzI8tA6mFxXJk5BvWeTeJQADMIlEY90AAKAEo9gA+HTrSgAdyQxEYkF+O0UADpkgDtDZGBxKLAjmUMj4jkYUep1JtltB4aY8N4fljXOUvONQBDaIFiMFQkcADTbeQIoLQELEP42dQiHDQDgIGxNNEY0DU9IVNB4kGE0DE8xkilU7EK5kcrkNeHazI1QUq0XECI4FD6hE5Yq8dRS9GY9p4HBKgmEtWk8mUo6vDhIcxoGh4VU0jJ6uGknp9AbQU2EkViiWO1HO2WnaAeoXhlA5dW+qlUChmbOJ4Wi8WSnjWc2W60fNDQV6oSq1oA) and see how they are discriminating in each case
 
-#### Basic State Transition Diagram
-```mermaid
-stateDiagram-v2
-    [*] --> Idle
-    Idle --> Connecting: connect()
-    Connecting --> Connected: onSuccess
-    Connecting --> Error: onFailure
-    Connected --> Idle: disconnect()
-    Error --> Idle: reset()
-    Error --> Connecting: retry()
-```
-
-#### Transition Locking Pattern
-State machines ensure that only valid transitions can occur from each state, preventing impossible states and race conditions:
-
-```mermaid
-stateDiagram-v2
-    state "Authentication Flow" as auth {
-        [*] --> LoggedOut
-        LoggedOut --> LoggingIn: login()
-        LoggingIn --> LoggedIn: success
-        LoggingIn --> LoginFailed: failure
-        LoginFailed --> LoggingIn: retry()
-        LoginFailed --> LoggedOut: cancel()
-        LoggedIn --> LoggingOut: logout()
-        LoggingOut --> LoggedOut: complete
-    }
-    
-    note right of LoggingIn
-        While in LoggingIn state:
-        - login() is locked (can't double-login)
-        - logout() is locked (not logged in yet)
-        - Only success/failure transitions allowed
-    end note
-```
-
-#### Parallel State Machines
-Complex applications often need multiple state machines working together:
-
-```mermaid
-stateDiagram-v2
-    state "Application State" as app {
-        state fork_state <<fork>>
-        state join_state <<join>>
-        
-        [*] --> fork_state
-        fork_state --> WebSocket
-        fork_state --> DataFetch
-        
-        state "WebSocket Connection" as WebSocket {
-            WS_Idle --> WS_Connecting
-            WS_Connecting --> WS_Connected
-            WS_Connected --> WS_Idle
-        }
-        
-        state "Data Fetching" as DataFetch {
-            Data_Idle --> Data_Loading
-            Data_Loading --> Data_Success
-            Data_Loading --> Data_Error
-            Data_Success --> Data_Idle
-            Data_Error --> Data_Idle
-        }
-        
-        WebSocket --> join_state
-        DataFetch --> join_state
-        join_state --> [*]
-    }
-```
-
-#### Hierarchical State Machines
-States can contain sub-states for more complex behaviors:
-
-```mermaid
-stateDiagram-v2
-    state "Media Player" as player {
-        [*] --> Stopped
-        
-        Stopped --> Playing: play()
-        
-        state Playing {
-            [*] --> Buffering
-            Buffering --> Active: bufferReady
-            Active --> Buffering: bufferEmpty
-            Active --> Paused: pause()
-            Paused --> Active: resume()
-        }
-        
-        Playing --> Stopped: stop()
-        Playing --> Error: onError
-        Error --> Stopped: reset()
-    }
-```
-
-### Why Combine State Machines with Discriminated Unions?
-
-1. **Type Safety**: TypeScript ensures you handle all states and only access properties that exist
-2. **Exhaustiveness Checking**: The compiler warns if you forget to handle a state
-3. **Impossible States Prevention**: Can't accidentally be in multiple states simultaneously
-4. **Clear Contracts**: Transitions are explicitly defined in the type system
-
-</details>
 
 ### Expected Usage
 
@@ -199,9 +102,6 @@ Use `test/sdk.tsx` to design the API.
 
 The seeded code is in `src/` from `zustand`. Feel free to throw it out if you'd prefer, but use it as a start on how to build this type of tool - you can choose another API if you find that better.
 
-### Submission
-
-Reply to the email you got with the zipped folder after an hr (max 75 mins) after you start.
 
 ### References
 
